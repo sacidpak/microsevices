@@ -5,10 +5,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients(
         basePackages = "com.sacidpak.clients"
+)
+@SpringBootApplication(
+        scanBasePackages = {
+                "com.sacidpak.customer",
+                "com.sacidpak.queueconfig",
+        }
 )
 public class CustomerApplication {
     public static void main(String[] args) {

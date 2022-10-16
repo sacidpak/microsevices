@@ -16,6 +16,7 @@
     <module>clients</module>
     <module>notification</module>
       <module>api-gateway</module>
+      <module>queue-config</module>
   </modules>
 
   <name>microsevices</name>
