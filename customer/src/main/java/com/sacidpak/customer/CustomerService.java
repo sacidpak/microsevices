@@ -1,14 +1,18 @@
 package com.sacidpak.customer;
 
+import com.sacidpak.clients.notification.NotificationClient;
+import com.sacidpak.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import com.sacidpak.clients.fraud.FraudCheckResponse;
+import com.sacidpak.clients.fraud.FraudClient;
 
 @Service
 @AllArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
-    private final RestTemplate restTemplate;
+    private final FraudClient fraudClient;
+    private final NotificationClient notificationClient;
 
     public void registerCustomer(CustomerRegistrationRequest request) {
         Customer customer = Customer.builder()
@@ -19,11 +23,20 @@ public class CustomerService {
         //todo: check if email valid
         //todo: check if email not taken
         customerRepository.saveAndFlush(customer);
-        FraudCheckResponse response = restTemplate.getForObject("http://FRAUD/api/v1/fraud-check/{customerId}",
-                FraudCheckResponse.class, customer.getId());
+        FraudCheckResponse response =
+                fraudClient.isFraudster(customer.getId());
+
         if(response.isFraudster()){
             throw new IllegalStateException("frauster");
         }
-        //todo: send notification
+        // todo: make it async. i.e add to queue
+        notificationClient.sendNotification(
+                new NotificationRequest(
+                        customer.getId(),
+                        customer.getEmail(),
+                        String.format("Hi %s, welcome...",
+                                customer.getFirstName())
+                )
+        );
     }
 }
